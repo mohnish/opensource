@@ -1,6 +1,6 @@
 ## Opensource.rb
 
-Add Opensource License to your project
+Add an Opensource License to your project
 
 ## Installation
 
