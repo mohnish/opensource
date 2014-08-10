@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+
+options = {}
+# Set this by reading the filenames from templates
+LICENSES = [:mit, :apache, :bsd, :gpl]
+
+OptionParser.new do |opts|
+  opts.banner = 'Usage: opensource [options]'
+  opts.separator ''
+  opts.separator 'Specific options:'
+
+
+  opts.on('-l', '--license LICENSE', LICENSES, "LICENSE can be #{LICENSES.map(&:to_s)}") do |l|
+    options[:license] = l
+  end
+
+  opts.on('-v', '--version', 'Print the version') do |v|
+    options[:version] = v
+  end
+end.parse!
