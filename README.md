@@ -19,8 +19,17 @@ Or install it yourself as:
     $ gem install opensource
 
 ## Usage
+```
+opensource OPTIONS
 
-TODO: Write usage instructions here
+Specific options:
+    -l, --license LICENSE            LICENSE can be mit
+    -a, --append README              Append LICENSE content to README file
+
+Common options:
+    -v, --version                    Print the version
+    -h, --help                       Show this message
+```
 
 ## License
 
