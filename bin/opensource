@@ -1,22 +1,45 @@
 #!/usr/bin/env ruby
 
 require 'optparse'
+require_relative '../lib/opensource'
 
 options = {}
-# Set this by reading the filenames from templates
-LICENSES = [:mit, :apache, :bsd, :gpl]
+
+LICENSES = Dir.new('./templates').map do |filename|
+  File.basename(filename, '.erb') if !['.', '..'].include?(filename)
+end.compact
 
 OptionParser.new do |opts|
-  opts.banner = 'Usage: opensource [options]'
+  opts.banner = "Usage: #{File.basename($PROGRAM_NAME)} OPTIONS"
   opts.separator ''
   opts.separator 'Specific options:'
 
-
-  opts.on('-l', '--license LICENSE', LICENSES, "LICENSE can be #{LICENSES.map(&:to_s)}") do |l|
+  opts.on('-l', '--license LICENSE', LICENSES, "LICENSE can be #{LICENSES.join('|')}") do |l|
     options[:license] = l
   end
 
-  opts.on('-v', '--version', 'Print the version') do |v|
-    options[:version] = v
+  opts.on('-a', '--append README', 'Append LICENSE content to README file') do |a|
+    options[:append] = a
+  end
+
+  opts.separator ''
+  opts.separator 'Common options:'
+
+  opts.on_tail('-v', '--version', 'Print the version') do
+    puts Opensource::VERSION
+    exit
+  end
+
+  opts.on_tail('-h', '--help', 'Show this message') do
+    puts opts
+    exit
   end
 end.parse!
+
+begin
+  Opensource::License.new(options).process
+rescue Opensource::Error => e
+  # TODO: Make sure the above call raises only Opensource::Error
+  puts "Error: #{e.message}"
+  exit 1
+end
