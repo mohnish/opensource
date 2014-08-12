@@ -6,16 +6,12 @@ require_relative '../lib/opensource'
 
 options = {}
 
-LICENSES = Dir.new("#{Dir.pwd}/templates").map do |filename|
-  File.basename(filename, '.erb') if !['.', '..'].include?(filename)
-end.compact
-
 OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename($PROGRAM_NAME)} OPTIONS"
   opts.separator ''
   opts.separator 'Specific options:'
 
-  opts.on('-l', '--license LICENSE', LICENSES, "LICENSE can be #{LICENSES.join('|')}") do |l|
+  opts.on('-l', '--license LICENSE', Opensource::LICENSES, "LICENSE can be #{Opensource::LICENSES.join('|')}") do |l|
     options[:license] = l
   end
 

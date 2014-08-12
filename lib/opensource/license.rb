@@ -6,7 +6,7 @@ module Opensource
       @options = options
       @user = Owner.get_credentials
       @user['escaped_email'] = "&lt;#{@user['email']}&gt;"
-      @license = ERB.new(File.read(File.expand_path("./templates/#{@options[:license]}.erb"))).result(binding)
+      @license = ERB.new(File.read("#{File.expand_path("../../../templates", __FILE__)}/#{@options[:license]}.erb")).result(binding)
     end
 
     def process
