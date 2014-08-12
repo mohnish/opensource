@@ -11,6 +11,11 @@ OptionParser.new do |opts|
   opts.separator ''
   opts.separator 'Specific options:'
 
+  opts.on('-s', '--setup', 'Setup user credentials in ~/.osrc file') do |s|
+    Opensource::Owner.set_credentials
+    exit
+  end
+
   opts.on('-l', '--license LICENSE', Opensource::LICENSES, "LICENSE can be #{Opensource::LICENSES.join('|')}") do |l|
     options[:license] = l
   end
