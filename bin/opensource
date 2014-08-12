@@ -6,7 +6,7 @@ require_relative '../lib/opensource'
 
 options = {}
 
-LICENSES = Dir.new('../templates').map do |filename|
+LICENSES = Dir.new("#{Dir.pwd}/templates").map do |filename|
   File.basename(filename, '.erb') if !['.', '..'].include?(filename)
 end.compact
 
