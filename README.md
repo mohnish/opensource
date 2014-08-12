@@ -20,9 +20,10 @@ Or install it yourself as:
 
 ## Usage
 ```
-opensource OPTIONS
+Usage: opensource OPTIONS
 
 Specific options:
+    -s, --setup                      Setup user credentials in ~/.osrc file
     -l, --license LICENSE            LICENSE can be mit
     -a, --append README              Append LICENSE content to README file
 
