@@ -1,6 +1,6 @@
 ## Opensource.rb
 
-Add an Opensource License to your project
+Add an Opensource License to your project. Helps get rid of the annoyance of adding a new license to the project and optionally append the content of the license to the README.md file.
 
 ## Installation
 
