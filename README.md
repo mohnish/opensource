@@ -32,6 +32,10 @@ Common options:
     -h, --help                       Show this message
 ```
 
+### TODO
+
+- Currently only MIT is supported. Need to add support for other open source licenses like Apache, GPL, BSD etc
+
 ## License
 
 (The MIT License)
