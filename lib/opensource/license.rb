@@ -14,7 +14,7 @@ module Opensource
       append if @options[:append]
     end
 
-    private
+  private
     def generate
       f = File.new("#{Dir.pwd}/LICENSE", "w")
       f.write(@license)
