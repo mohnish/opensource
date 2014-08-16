@@ -24,7 +24,7 @@ Usage: opensource OPTIONS
 
 Specific options:
     -s, --setup                      Setup user credentials in ~/.osrc file
-    -l, --license LICENSE            LICENSE can be mit
+    -l, --license LICENSE            LICENSE can be apache2|bsd|gpl3|mit
     -a, --append README              Append LICENSE content to README file
 
 Common options:
