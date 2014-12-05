@@ -27,6 +27,8 @@ module Opensource
         end
       end
 
+      user['escaped_email'] = "&lt;#{user['email']}&gt;"
+
       user
     end
   end
