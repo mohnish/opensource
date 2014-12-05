@@ -6,7 +6,7 @@ require_relative '../lib/opensource'
 
 options = {}
 
-OptionParser.new do |opts|
+option_parser = OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename($PROGRAM_NAME)} OPTIONS"
   opts.separator ''
   opts.separator 'Specific options:'
@@ -36,9 +36,15 @@ OptionParser.new do |opts|
     puts opts
     exit
   end
-end.parse!
+end
 
 begin
+  option_parser.parse!
+  if options.empty?
+    puts option_parser
+    exit 1
+  end
+
   Opensource::License.new(options).process
 rescue Opensource::Error => e
   # TODO: Make sure the above call raises only Opensource::Error
