@@ -1,4 +1,4 @@
-module Opensource
+module OpenSource
   module Owner
     extend self
 

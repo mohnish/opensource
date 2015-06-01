@@ -1,15 +1,15 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'opensource/version'
+require 'open_source/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "opensource"
-  spec.version       = Opensource::VERSION
+  spec.version       = OpenSource::VERSION
   spec.authors       = ["Mohnish Thallavajhula"]
   spec.email         = ["i@mohni.sh"]
-  spec.summary       = %q{Add a license to your opensource project}
-  spec.description   = %q{Add a license to your opensource project by running a simple command}
+  spec.summary       = %q{Command line tool that lets you add an open source license to your project by running a simple command}
+  spec.description   = %q{Command line tool that lets you add an open source license to your project by running a simple command}
   spec.homepage      = "https://github.com/mohnish/opensource.rb"
   spec.license       = "MIT"
 

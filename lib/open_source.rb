@@ -1,9 +1,9 @@
-require_relative 'opensource/version'
-require_relative 'opensource/error'
-require_relative 'opensource/owner'
-require_relative 'opensource/license'
+require 'open_source/version'
+require 'open_source/error'
+require 'open_source/owner'
+require 'open_source/license'
 
-module Opensource
+module OpenSource
   LICENSES = Dir.entries(File.expand_path("../../templates", __FILE__)).map do |filename|
     File.basename(filename, '.erb') if !['.', '..'].include?(filename)
   end.compact

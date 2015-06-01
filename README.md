@@ -1,8 +1,8 @@
-# Opensource.rb
+# OpenSource
 
 [![Code Climate](https://codeclimate.com/github/mohnish/opensource.rb/badges/gpa.svg)](https://codeclimate.com/github/mohnish/opensource.rb)
 
-Add an Opensource License to your project. Helps get rid of the annoyance of adding a new license to the project and optionally append the content of the license to the README.md file.
+Command line tool that lets you add an open source license to your project by running a simple command.
 
 ## Supported Licenses
 

@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 require 'optparse'
-require_relative '../lib/opensource'
+require 'open_source'
 
 options = {}
 
@@ -12,11 +12,11 @@ option_parser = OptionParser.new do |opts|
   opts.separator 'Specific options:'
 
   opts.on('-s', '--setup', 'Setup user credentials in ~/.osrc file') do |s|
-    Opensource::Owner.set_credentials
+    OpenSource::Owner.set_credentials
     exit
   end
 
-  opts.on('-l', '--license LICENSE', Opensource::LICENSES, "LICENSE can be #{Opensource::LICENSES.join('|')}") do |l|
+  opts.on('-l', '--license LICENSE', OpenSource::LICENSES, "LICENSE can be #{OpenSource::LICENSES.join('|')}") do |l|
     options[:license] = l
   end
 
@@ -28,7 +28,7 @@ option_parser = OptionParser.new do |opts|
   opts.separator 'Common options:'
 
   opts.on_tail('-v', '--version', 'Print the version') do
-    puts Opensource::VERSION
+    puts OpenSource::VERSION
     exit
   end
 
@@ -45,9 +45,9 @@ begin
     exit 1
   end
 
-  Opensource::License.new(options).process
-rescue Opensource::Error => e
-  # TODO: Make sure the above call raises only Opensource::Error
+  OpenSource::License.new(options).process
+rescue OpenSource::Error => e
+  # TODO: Make sure the above call raises only OpenSource::Error
   puts "Error: #{e.message}"
   exit 1
 end

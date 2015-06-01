@@ -1,6 +1,6 @@
 require 'erb'
 
-module Opensource
+module OpenSource
   class License
     def initialize(options)
       @options = options
