@@ -1,4 +1,10 @@
 
+0.6.2 / 2015-06-02
+==================
+
+  * refactor lib to separate out requesting from owner
+  * add code climate
+
 0.6.1 / 2015-05-31
 ==================
 
