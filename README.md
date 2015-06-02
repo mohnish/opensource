@@ -1,6 +1,6 @@
 # OpenSource
 
-[![Code Climate](https://codeclimate.com/github/mohnish/opensource.rb/badges/gpa.svg)](https://codeclimate.com/github/mohnish/opensource.rb)
+[![Code Climate](https://codeclimate.com/github/mohnish/opensource/badges/gpa.svg)](https://codeclimate.com/github/mohnish/opensource)
 
 Command line tool that lets you add an open source license to your project by running a simple command.
 
