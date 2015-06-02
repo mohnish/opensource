@@ -12,11 +12,11 @@ option_parser = OptionParser.new do |opts|
   opts.separator 'Specific options:'
 
   opts.on('-s', '--setup', 'Setup user credentials in ~/.osrc file') do |s|
-    OpenSource::Owner.set_credentials
+    OpenSource.setup_owner_credentails
     exit
   end
 
-  opts.on('-l', '--license LICENSE', OpenSource::LICENSES, "LICENSE can be #{OpenSource::LICENSES.join('|')}") do |l|
+  opts.on('-l', '--license LICENSE', OpenSource::LICENSES, "LICENSE can be #{OpenSource::LICENSES.join(', ')}") do |l|
     options[:license] = l
   end
 
@@ -42,7 +42,7 @@ begin
   option_parser.parse!
   if options.empty?
     puts option_parser
-    exit 1
+    exit 0
   end
 
   OpenSource::License.new(options).process
