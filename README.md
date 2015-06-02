@@ -13,27 +13,19 @@ Command line tool that lets you add an open source license to your project by ru
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Run:
 
-```ruby
-gem 'opensource'
+```bash
+$ gem install opensource
 ```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install opensource
 
 ## Usage
-```
+```bash
 Usage: opensource OPTIONS
 
 Specific options:
     -s, --setup                      Setup user credentials in ~/.osrc file
-    -l, --license LICENSE            LICENSE can be apache2|bsd|gpl3|mit
+    -l, --license LICENSE            LICENSE can be apache2, bsd, gpl3, mit
     -a, --append README              Append LICENSE content to README file
 
 Common options:
