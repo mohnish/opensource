@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["i@mohni.sh"]
   spec.summary       = %q{Command line tool that lets you add an open source license to your project by running a simple command}
   spec.description   = %q{Command line tool that lets you add an open source license to your project by running a simple command}
-  spec.homepage      = "https://github.com/mohnish/opensource.rb"
+  spec.homepage      = "https://github.com/mohnish/opensource"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
