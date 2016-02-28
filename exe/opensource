@@ -12,7 +12,7 @@ option_parser = OptionParser.new do |opts|
   opts.separator 'Specific options:'
 
   opts.on('-s', '--setup', 'Setup user credentials in ~/.osrc file') do |s|
-    OpenSource.setup_owner_credentails
+    OpenSource.setup_owner_credentials
     exit
   end
 
