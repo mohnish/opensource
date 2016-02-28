@@ -41,13 +41,13 @@ end
 begin
   option_parser.parse!
   if options.empty?
-    logger.info(option_parser)
+    OpenSource.logger.info(option_parser)
     exit 0
   end
 
   OpenSource::License::Generator.new(options).generate
 rescue OpenSource::Error => e
   # TODO: Make sure the above call raises only OpenSource::Error
-  logger.fatal("Error: #{e.message}")
+  OpenSource.logger.fatal("Error: #{e.message}")
   exit 1
 end
