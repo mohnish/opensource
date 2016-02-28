@@ -1,3 +1,4 @@
+.DS_Store
 /.bundle/
 /.yardoc
 /Gemfile.lock
@@ -12,3 +13,4 @@
 *.o
 *.a
 mkmf.log
+tags
