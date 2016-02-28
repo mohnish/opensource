@@ -9,7 +9,7 @@ describe OpenSource do
 
   describe '::SUPPORTED_LICENSES' do
     it 'returns a list of supported licenses' do
-      expect(OpenSource::SUPPORTED_LICENSES).to eql(['apache2', 'bsd', 'gpl3', 'mit'])
+      expect(OpenSource::SUPPORTED_LICENSES).to include('apache2', 'bsd', 'gpl3', 'mit')
     end
   end
 
