@@ -4,6 +4,8 @@
 
 > Command line tool that lets you add an open source license to your project by running a simple command.
 
+Supports **Ruby 1.9.3+**.
+
 ## Supported Licenses
 
 - MIT
