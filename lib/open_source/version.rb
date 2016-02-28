@@ -1,3 +1,3 @@
 module OpenSource
-  VERSION = '0.6.2'
+  VERSION = '0.9.9'
 end
