@@ -12,11 +12,11 @@ option_parser = OptionParser.new do |opts|
   opts.separator 'Specific options:'
 
   opts.on('-s', '--setup', 'Setup user credentials in ~/.osrc file') do |s|
-    OpenSource.setup_owner_credentails
+    OpenSource.setup_owner_credentials
     exit
   end
 
-  opts.on('-l', '--license LICENSE', OpenSource::LICENSES, "LICENSE can be #{OpenSource::LICENSES.join(', ')}") do |l|
+  opts.on('-l', '--license LICENSE', OpenSource::SUPPORTED_LICENSES, "LICENSE can be #{OpenSource::SUPPORTED_LICENSES.join(', ')}") do |l|
     options[:license] = l
   end
 
@@ -28,12 +28,12 @@ option_parser = OptionParser.new do |opts|
   opts.separator 'Common options:'
 
   opts.on_tail('-v', '--version', 'Print the version') do
-    puts OpenSource::VERSION
+    OpenSource.logger.info(OpenSource::VERSION)
     exit
   end
 
   opts.on_tail('-h', '--help', 'Show this message') do
-    puts opts
+    OpenSource.logger.info(opts)
     exit
   end
 end
@@ -41,13 +41,13 @@ end
 begin
   option_parser.parse!
   if options.empty?
-    puts option_parser
+    OpenSource.logger.info(option_parser)
     exit 0
   end
 
-  OpenSource::License.new(options).process
+  OpenSource::License::Generator.new(options).generate
 rescue OpenSource::Error => e
   # TODO: Make sure the above call raises only OpenSource::Error
-  puts "Error: #{e.message}"
+  OpenSource.logger.fatal("Error: #{e.message}")
   exit 1
 end

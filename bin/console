@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'open_source'
+
+require 'irb'
+require 'irb/completion'
+
+IRB.conf[:PROMPT_MODE] = :SIMPLE
+IRB.conf[:AUTO_INDENT] = true
+
+IRB.start

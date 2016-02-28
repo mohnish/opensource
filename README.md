@@ -2,7 +2,7 @@
 
 [![Code Climate](https://codeclimate.com/github/mohnish/opensource/badges/gpa.svg)](https://codeclimate.com/github/mohnish/opensource)
 
-Command line tool that lets you add an open source license to your project by running a simple command.
+> Command line tool that lets you add an open source license to your project by running a simple command.
 
 Supports **Ruby 1.9.3+**.
 
@@ -22,6 +22,7 @@ $ gem install opensource
 ```
 
 ## Usage
+
 ```bash
 Usage: opensource OPTIONS
 
@@ -39,7 +40,7 @@ Common options:
 
 (The MIT License)
 
-Copyright (c) 2015 Mohnish Thallavajhula &lt;i@mohni.sh&gt;
+Copyright (c) 2016 Mohnish Thallavajhula &lt;i@mohni.sh&gt;
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
