@@ -17,13 +17,13 @@ module OpenSource
     private
       def create_license_file
         f = File.new("#{Dir.pwd}/LICENSE", 'w')
-        f.write(@license.result)
+        f.write(@license.result(binding))
         f.close
       end
 
       def append_to_file
         File.open(File.expand_path(@options[:append]), 'a') do |f|
-          f << "\n## License\n\n#{@license.result}"
+          f << "\n## License\n\n#{@license.result(binding)}"
         end
       end
     end
