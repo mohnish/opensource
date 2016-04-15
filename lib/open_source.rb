@@ -15,9 +15,9 @@ module OpenSource
 
   def self.request_owner_credentials
     OpenSource.logger.info("Enter full name: ")
-    name = gets.chomp
+    name = gets.chomp.strip
     OpenSource.logger.info("Enter email address: ")
-    email = gets.chomp
+    email = gets.chomp.strip
 
     { name: name, email: email }
   end
