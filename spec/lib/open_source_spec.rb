@@ -18,7 +18,7 @@ describe OpenSource do
     before { allow(OpenSource).to receive(:gets).and_return(stdin_mock) }
 
     it 'requests the owner credentials' do
-      expect(stdin_mock).to receive(:chomp).twice
+      expect(stdin_mock).to receive(:chomp).twice.and_return('foo')
       OpenSource.request_owner_credentials
     end
   end

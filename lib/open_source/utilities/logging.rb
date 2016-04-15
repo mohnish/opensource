@@ -5,7 +5,7 @@ module OpenSource
     module Logging
       class Simple < Logger::Formatter
         def call(severity, time, progname, msg)
-          "OpenSource: #{msg}\n"
+          "#{msg}\n"
         end
       end
 
