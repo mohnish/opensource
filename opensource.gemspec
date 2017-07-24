@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = 'opensource'
   spec.version       = OpenSource::VERSION
   spec.authors       = ['Mohnish Thallavajhula']
-  spec.email         = ['i@mohni.sh']
+  spec.email         = ['m@mt.cx']
   spec.summary       = spec.description = %q{Command line tool that lets you add an open source license to your project by running a simple command}
   spec.homepage      = 'https://github.com/mohnish/opensource'
   spec.license       = 'MIT'
