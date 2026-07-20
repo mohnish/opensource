@@ -1,10 +1,9 @@
 # OpenSource
-[![Build Status](https://travis-ci.org/mohnish/opensource.svg?branch=master)](https://travis-ci.org/mohnish/opensource)
-[![Code Climate](https://codeclimate.com/github/mohnish/opensource/badges/gpa.svg)](https://codeclimate.com/github/mohnish/opensource)
+[![CI](https://github.com/mohnish/opensource/actions/workflows/ci.yml/badge.svg)](https://github.com/mohnish/opensource/actions/workflows/ci.yml)
 
 > Command line tool that lets you add an open source license to your project by running a simple command.
 
-Supports **Ruby 1.9.3+**.
+Supports **Ruby 3.2+**. Local development targets **Ruby 4.0.6**, as declared in `.ruby-version`.
 
 ## Supported Licenses
 
@@ -18,7 +17,7 @@ Supports **Ruby 1.9.3+**.
 Run:
 
 ```bash
-$ gem install opensource
+gem install opensource
 ```
 
 ## Usage
@@ -36,11 +35,59 @@ Common options:
     -h, --help                       Show this message
 ```
 
+## Development
+
+This project has been updated for the current Ruby toolchain:
+
+- Ruby `4.0.6` for local development
+- Ruby `3.2+` as the supported runtime range
+- Bundler `4`
+- Rake `13`
+- RSpec `3.13`
+- GitHub Actions CI instead of Travis CI
+- Dependabot for Bundler and GitHub Actions updates
+
+Install dependencies:
+
+```bash
+make setup
+```
+
+Run the test suite:
+
+```bash
+make test
+```
+
+Build the gem package:
+
+```bash
+make build
+```
+
+Run the local CI checks:
+
+```bash
+make ci
+```
+
+See all available shortcuts:
+
+```bash
+make
+```
+
+CI runs the test suite on Ruby `3.2`, `3.3`, `3.4`, and `4.0`.
+
+### Runtime Dependencies
+
+Ruby 4 no longer loads `logger` as an always-available standard library dependency. The gem declares `logger` explicitly so the CLI works on Ruby 4 and newer RubyGems installations.
+
 ## License
 
 (The MIT License)
 
-Copyright (c) 2017 Mohnish Thallavajhula &lt;m@mt.cx&gt;
+Copyright (c) 2026 Mohnish Thallavajhula &lt;hi@iam.mt&gt;
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
