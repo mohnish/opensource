@@ -1,4 +1,10 @@
 
+2.0.0 / 2026-07-19
+==================
+
+  * Upgrade to the latest and greatest
+  * Create CODE_OF_CONDUCT.md
+
 1.1.1 / 2016-04-15
 ==================
 
