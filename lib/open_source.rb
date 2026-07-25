@@ -27,4 +27,14 @@ module OpenSource
     owner = License::Owner.new
     owner.credentials = owner_credentials
   end
+
+  def self.with_owner_credentials(interactive: $stdin.tty?)
+    yield
+  rescue MissingCredentialsError
+    raise unless interactive
+
+    OpenSource.logger.info("Owner credentials are not set. Let's set them up now.")
+    setup_owner_credentials
+    yield
+  end
 end

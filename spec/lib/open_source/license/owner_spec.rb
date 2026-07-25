@@ -1,25 +1,60 @@
 require 'spec_helper'
 
 describe OpenSource::License::Owner do
-  let(:config_path) { File.expand_path('~/.osrc') }
+  let(:config_dir) { Dir.mktmpdir }
+  let(:config_path) { File.join(config_dir, '.osrc') }
+
+  before do
+    stub_const('OpenSource::CONFIG_PATH', config_path)
+  end
+
+  after do
+    FileUtils.remove_entry(config_dir)
+  end
 
   describe '#credentials=' do
     let(:credentials) { { name: 'mt', email: 'mt@example.com' } }
-    let(:config_file_mock) { double('config_file') }
-    let(:file_contents_mock) { double('file_contents') }
 
     it 'creates an osrc file' do
-      expect(File).to receive(:new).with(config_path, 'w').and_return(config_file_mock)
-      expect(YAML).to receive(:dump).with(credentials).and_return(file_contents_mock)
-      expect(config_file_mock).to receive(:write).with(file_contents_mock)
       subject.credentials = credentials
+
+      expect(YAML.load_file(config_path)).to eql(credentials)
+    end
+
+    it 'raises an OpenSource::ConfigError when the config cannot be written' do
+      allow(File).to receive(:open).with(config_path, 'w').and_raise(Errno::EACCES.new(config_path))
+
+      expect { subject.credentials = credentials }.to raise_error(OpenSource::ConfigError, /Unable to write/)
     end
   end
 
   describe '#credentials' do
     it 'retrieves the credentials from the config file' do
-      expect(YAML).to receive(:load_file).with(config_path)
-      subject.credentials
+      File.write(config_path, YAML.dump({ name: 'mt', email: 'mt@example.com' }))
+
+      expect(subject.credentials).to eql({ name: 'mt', email: 'mt@example.com' })
+    end
+
+    it 'accepts string keys in the config file' do
+      File.write(config_path, YAML.dump({ 'name' => 'mt', 'email' => 'mt@example.com' }))
+
+      expect(subject.credentials).to eql({ name: 'mt', email: 'mt@example.com' })
+    end
+
+    it 'raises an OpenSource::ConfigError when the config file is missing' do
+      expect { subject.credentials }.to raise_error(OpenSource::MissingCredentialsError, /Missing .*--setup/)
+    end
+
+    it 'raises an OpenSource::ConfigError when the config file cannot be parsed' do
+      File.write(config_path, ': [')
+
+      expect { subject.credentials }.to raise_error(OpenSource::ConfigError, /Unable to parse/)
+    end
+
+    it 'raises an OpenSource::ConfigError when the config file is invalid' do
+      File.write(config_path, YAML.dump(['mt', 'mt@example.com']))
+
+      expect { subject.credentials }.to raise_error(OpenSource::ConfigError, /Invalid configuration/)
     end
   end
 
@@ -34,8 +69,16 @@ describe OpenSource::License::Owner do
   describe '#markdown_supported_email' do
     before { allow(subject).to receive(:credentials).and_return({ name: 'mt', email: 'mt@example.com' }) }
 
-    it 'returns the mark down supported email address of the owner' do
+    it 'returns the Markdown-supported email address of the owner' do
       expect(subject.markdown_supported_email).to eql('&lt;mt@example.com&gt;')
+    end
+  end
+
+  describe '#license_email' do
+    before { allow(subject).to receive(:credentials).and_return({ name: 'mt', email: 'mt@example.com' }) }
+
+    it 'returns the raw license email address of the owner' do
+      expect(subject.license_email).to eql('<mt@example.com>')
     end
   end
 

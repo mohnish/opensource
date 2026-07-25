@@ -1,6 +1,16 @@
 require 'spec_helper'
 
 describe OpenSource do
+  describe 'error types' do
+    it 'exposes tool errors through OpenSource::Error' do
+      expect(OpenSource::OptionError).to be < OpenSource::Error
+      expect(OpenSource::ConfigError).to be < OpenSource::Error
+      expect(OpenSource::MissingCredentialsError).to be < OpenSource::ConfigError
+      expect(OpenSource::LicenseError).to be < OpenSource::Error
+      expect(OpenSource::FileError).to be < OpenSource::Error
+    end
+  end
+
   describe '::CONFIG_PATH' do
     it 'returns the configuration path of osrc file' do
       expect(OpenSource::CONFIG_PATH).to eql(File.expand_path('~/.osrc'))
@@ -30,6 +40,44 @@ describe OpenSource do
       expect(OpenSource::License::Owner).to receive(:new).and_return(owner_mock)
       expect(owner_mock).to receive('credentials=')
       OpenSource.setup_owner_credentials
+    end
+  end
+
+  describe '.with_owner_credentials' do
+    it 'sets up credentials and retries when missing credentials are hit interactively' do
+      attempts = 0
+
+      expect(OpenSource).to receive(:setup_owner_credentials)
+
+      result = OpenSource.with_owner_credentials(interactive: true) do
+        attempts += 1
+        raise OpenSource::MissingCredentialsError, 'Missing credentials' if attempts == 1
+
+        :generated
+      end
+
+      expect(result).to eq(:generated)
+      expect(attempts).to eq(2)
+    end
+
+    it 'raises missing credentials without retrying when non-interactive' do
+      expect(OpenSource).not_to receive(:setup_owner_credentials)
+
+      expect do
+        OpenSource.with_owner_credentials(interactive: false) do
+          raise OpenSource::MissingCredentialsError, 'Missing credentials'
+        end
+      end.to raise_error(OpenSource::MissingCredentialsError, 'Missing credentials')
+    end
+
+    it 'does not retry other config errors' do
+      expect(OpenSource).not_to receive(:setup_owner_credentials)
+
+      expect do
+        OpenSource.with_owner_credentials(interactive: true) do
+          raise OpenSource::ConfigError, 'Invalid configuration'
+        end
+      end.to raise_error(OpenSource::ConfigError, 'Invalid configuration')
     end
   end
 end

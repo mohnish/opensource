@@ -1,7 +1,8 @@
 module OpenSource
-  module Error
-    def self.exception(*args)
-      RuntimeError.new(*args).extend(self)
-    end
-  end
+  class Error < StandardError; end
+  class OptionError < Error; end
+  class ConfigError < Error; end
+  class MissingCredentialsError < ConfigError; end
+  class LicenseError < Error; end
+  class FileError < Error; end
 end
