@@ -28,9 +28,15 @@ describe OpenSource::License::Generator do
 
         OpenSource::License::Generator.new(options).generate
 
-        expect(File.read('LICENSE')).to include('The MIT License')
-        expect(File.read('README.md')).to include('## License')
-        expect(File.read('README.md')).to include('mt@example.com')
+        license = File.read('LICENSE')
+        readme = File.read('README.md')
+
+        expect(license).to include('The MIT License')
+        expect(license).to include('<mt@example.com>')
+        expect(license).not_to include('&lt;mt@example.com&gt;')
+        expect(readme).to include('## License')
+        expect(readme).to include('&lt;mt@example.com&gt;')
+        expect(readme).not_to include('<mt@example.com>')
       end
     end
 
@@ -40,8 +46,11 @@ describe OpenSource::License::Generator do
       it 'generates a license file' do
         OpenSource::License::Generator.new(options).generate
 
-        expect(File.read('LICENSE')).to include('The MIT License')
-        expect(File.read('LICENSE')).to include('mt@example.com')
+        license = File.read('LICENSE')
+
+        expect(license).to include('The MIT License')
+        expect(license).to include('<mt@example.com>')
+        expect(license).not_to include('&lt;mt@example.com&gt;')
       end
     end
 
@@ -51,12 +60,12 @@ describe OpenSource::License::Generator do
       end.to raise_error(OpenSource::LicenseError, /Unsupported license/)
     end
 
-    it 'raises an OpenSource::ConfigError when owner credentials are missing' do
+    it 'raises an OpenSource::MissingCredentialsError when owner credentials are missing' do
       File.delete(config_path)
 
       expect do
         OpenSource::License::Generator.new(license: 'mit').generate
-      end.to raise_error(OpenSource::ConfigError, /Missing .*--setup/)
+      end.to raise_error(OpenSource::MissingCredentialsError, /Missing .*--setup/)
 
       expect(File).not_to exist('LICENSE')
     end

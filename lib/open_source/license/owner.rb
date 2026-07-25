@@ -23,6 +23,10 @@ module OpenSource
         "&lt;#{credentials[:email]}&gt;"
       end
 
+      def license_email
+        "<#{credentials[:email]}>"
+      end
+
       def name
         credentials[:name]
       end
@@ -40,7 +44,7 @@ module OpenSource
       rescue OpenSource::Error
         raise
       rescue Errno::ENOENT
-        raise ConfigError, "Missing #{CONFIG_PATH}; run `opensource --setup` first"
+        raise MissingCredentialsError, "Missing #{CONFIG_PATH}; run `opensource --setup` first"
       rescue Psych::Exception => ex
         raise ConfigError, "Unable to parse #{CONFIG_PATH}: #{ex.message}"
       rescue SystemCallError => ex

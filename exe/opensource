@@ -50,7 +50,9 @@ begin
     exit 0
   end
 
-  OpenSource::License::Generator.new(options).generate
+  OpenSource.with_owner_credentials do
+    OpenSource::License::Generator.new(options).generate
+  end
 rescue OpenSource::Error => e
   OpenSource.logger.fatal("Error: #{e.message}")
   exit 1

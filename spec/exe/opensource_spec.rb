@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'open3'
+require 'pty'
 require 'rbconfig'
 
 describe 'exe/opensource' do
@@ -16,6 +17,26 @@ describe 'exe/opensource' do
 
   def run_cli(*args, stdin_data: nil)
     Open3.capture3(env, RbConfig.ruby, executable, *args, chdir: project_dir, stdin_data: stdin_data)
+  end
+
+  def run_cli_in_terminal(*args, stdin_data:)
+    output = +''
+    status = nil
+
+    PTY.spawn(env, RbConfig.ruby, executable, *args, chdir: project_dir) do |reader, writer, pid|
+      writer.write(stdin_data)
+      writer.close
+
+      begin
+        loop { output << reader.readpartial(1024) }
+      rescue EOFError, Errno::EIO
+        nil
+      end
+
+      _pid, status = Process.wait2(pid)
+    end
+
+    [output, status]
   end
 
   it 'reports option parser failures through OpenSource::Error' do
@@ -37,6 +58,17 @@ describe 'exe/opensource' do
     expect(File).not_to exist(File.join(project_dir, 'LICENSE'))
   end
 
+  it 'prompts for credentials and continues when missing credentials are hit interactively' do
+    output, status = run_cli_in_terminal('--license', 'mit', stdin_data: "mt\nmt@example.com\n")
+
+    expect(status.exitstatus).to eq(0)
+    expect(output).to include('Owner credentials are not set')
+    expect(output).to include('Enter full name:')
+    expect(output).to include('Enter email address:')
+    expect(File.read(File.join(project_dir, 'LICENSE'))).to include('<mt@example.com>')
+    expect(YAML.load_file(File.join(home_dir, '.osrc'))).to eq({ name: 'mt', email: 'mt@example.com' })
+  end
+
   it 'sets up credentials, generates a license, and appends it to a README' do
     File.write(File.join(project_dir, 'README.md'), "# Example\n")
 
@@ -49,7 +81,12 @@ describe 'exe/opensource' do
     expect(generate_status.exitstatus).to eq(0)
     expect(generate_stdout).to eq('')
     expect(generate_stderr).to eq('')
-    expect(File.read(File.join(project_dir, 'LICENSE'))).to include('mt@example.com')
-    expect(File.read(File.join(project_dir, 'README.md'))).to include('## License')
+    license = File.read(File.join(project_dir, 'LICENSE'))
+    readme = File.read(File.join(project_dir, 'README.md'))
+
+    expect(license).to include('<mt@example.com>')
+    expect(license).not_to include('&lt;mt@example.com&gt;')
+    expect(readme).to include('## License')
+    expect(readme).to include('&lt;mt@example.com&gt;')
   end
 end

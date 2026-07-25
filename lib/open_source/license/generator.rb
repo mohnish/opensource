@@ -45,7 +45,7 @@ module OpenSource
 
       def append_to_file
         append_path = File.expand_path(@options[:append])
-        license_content = render_license
+        license_content = render_license(markdown: true)
 
         File.open(append_path, 'a') do |file|
           file << "\n## License\n\n#{license_content}"
@@ -60,12 +60,17 @@ module OpenSource
         "#{Dir.pwd}/LICENSE"
       end
 
-      def render_license
+      def render_license(markdown: false)
+        previous_owner_email = @owner_email
+        @owner_email = markdown ? @owner.markdown_supported_email : @owner.license_email
+
         @license.result(binding)
       rescue OpenSource::Error
         raise
       rescue StandardError => ex
         raise LicenseError, "Unable to render #{@options[:license]} license: #{ex.message}"
+      ensure
+        @owner_email = previous_owner_email
       end
     end
   end

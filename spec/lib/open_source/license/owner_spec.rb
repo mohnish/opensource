@@ -42,7 +42,7 @@ describe OpenSource::License::Owner do
     end
 
     it 'raises an OpenSource::ConfigError when the config file is missing' do
-      expect { subject.credentials }.to raise_error(OpenSource::ConfigError, /Missing .*--setup/)
+      expect { subject.credentials }.to raise_error(OpenSource::MissingCredentialsError, /Missing .*--setup/)
     end
 
     it 'raises an OpenSource::ConfigError when the config file cannot be parsed' do
@@ -69,8 +69,16 @@ describe OpenSource::License::Owner do
   describe '#markdown_supported_email' do
     before { allow(subject).to receive(:credentials).and_return({ name: 'mt', email: 'mt@example.com' }) }
 
-    it 'returns the mark down supported email address of the owner' do
+    it 'returns the Markdown-supported email address of the owner' do
       expect(subject.markdown_supported_email).to eql('&lt;mt@example.com&gt;')
+    end
+  end
+
+  describe '#license_email' do
+    before { allow(subject).to receive(:credentials).and_return({ name: 'mt', email: 'mt@example.com' }) }
+
+    it 'returns the raw license email address of the owner' do
+      expect(subject.license_email).to eql('<mt@example.com>')
     end
   end
 
