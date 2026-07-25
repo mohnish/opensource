@@ -39,7 +39,12 @@ option_parser = OptionParser.new do |opts|
 end
 
 begin
-  option_parser.parse!
+  begin
+    option_parser.parse!
+  rescue OptionParser::ParseError => e
+    raise OpenSource::OptionError, e.message
+  end
+
   if options.empty?
     OpenSource.logger.info(option_parser)
     exit 0
@@ -47,7 +52,6 @@ begin
 
   OpenSource::License::Generator.new(options).generate
 rescue OpenSource::Error => e
-  # TODO: Make sure the above call raises only OpenSource::Error
   OpenSource.logger.fatal("Error: #{e.message}")
   exit 1
 end

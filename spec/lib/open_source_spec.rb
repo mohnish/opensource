@@ -1,6 +1,15 @@
 require 'spec_helper'
 
 describe OpenSource do
+  describe 'error types' do
+    it 'exposes tool errors through OpenSource::Error' do
+      expect(OpenSource::OptionError).to be < OpenSource::Error
+      expect(OpenSource::ConfigError).to be < OpenSource::Error
+      expect(OpenSource::LicenseError).to be < OpenSource::Error
+      expect(OpenSource::FileError).to be < OpenSource::Error
+    end
+  end
+
   describe '::CONFIG_PATH' do
     it 'returns the configuration path of osrc file' do
       expect(OpenSource::CONFIG_PATH).to eql(File.expand_path('~/.osrc'))
