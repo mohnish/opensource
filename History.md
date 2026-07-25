@@ -1,4 +1,10 @@
 
+2.1.0 / 2026-07-25
+==================
+
+  * handle missing credentials gracefully - improve ux
+  * Upgrade to latest deps
+
 2.0.0 / 2026-07-19
 ==================
 
