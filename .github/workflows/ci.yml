@@ -20,7 +20,7 @@ jobs:
           - "4.0"
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: ruby/setup-ruby@v1.321.0
+      - uses: ruby/setup-ruby@v1.324.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
