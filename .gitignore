@@ -1,16 +1,10 @@
 .DS_Store
-/.bundle/
-/.yardoc
-/Gemfile.lock
-/_yardoc/
-/coverage/
-/doc/
-/pkg/
-/spec/reports/
-/tmp/
-*.bundle
-*.so
-*.o
-*.a
-mkmf.log
-tags
+
+# Build artifacts
+/bin/
+/dist/
+
+# Test / coverage output
+*.test
+*.out
+coverage.txt

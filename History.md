@@ -1,4 +1,12 @@
 
+3.0.0 / unreleased
+==================
+
+  * Rewrite in Go and distribute a single static binary
+  * Install via Homebrew (`brew install mohnish/tap/opensource`) or `go install`
+  * Automate cross-platform releases with GoReleaser and GitHub Actions
+  * Read legacy `~/.osrc` files written by the Ruby version
+
 2.1.0 / 2026-07-25
 ==================
 

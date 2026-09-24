@@ -10,18 +10,20 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        ruby:
-          - "3.2"
-          - "3.3"
-          - "3.4"
-          - "4.0"
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: ruby/setup-ruby@v1.321.0
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          ruby-version: ${{ matrix.ruby }}
-          bundler-cache: true
-      - run: bundle exec rake
+          go-version-file: go.mod
+          cache: true
+      - name: Check formatting
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "These files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+      - run: go vet ./...
+      - run: go build ./...
+      - run: go test -race ./...

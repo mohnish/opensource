@@ -1,43 +1,37 @@
 .DEFAULT_GOAL := help
 
-BUNDLE ?= bundle
-RUBY ?= ruby
+BINARY := opensource
+VERSION ?= dev
 
-.PHONY: help setup install test spec build console version clean ci
+.PHONY: help build install test vet fmt fmt-check version clean snapshot
 
-help:
-	@printf "Available targets:\n"
-	@printf "  make setup    Install gem dependencies\n"
-	@printf "  make install  Alias for setup\n"
-	@printf "  make test     Run the default test suite\n"
-	@printf "  make spec     Run RSpec directly\n"
-	@printf "  make build    Build the gem package\n"
-	@printf "  make version  Smoke-check the CLI version command\n"
-	@printf "  make console  Start an IRB console with the gem loaded\n"
-	@printf "  make clean    Remove generated gem packages\n"
-	@printf "  make ci       Run the local CI checks\n"
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  make %-12s %s\n", $$1, $$2}'
 
-setup:
-	$(BUNDLE) install
+build: ## Build the binary into ./bin
+	go build -ldflags "-s -w -X main.version=$(VERSION)" -o bin/$(BINARY) .
 
-install: setup
+install: ## Install the binary into GOBIN
+	go install -ldflags "-s -w -X main.version=$(VERSION)" .
 
-test:
-	$(BUNDLE) exec rake
+test: ## Run the test suite
+	go test -race ./...
 
-spec:
-	$(BUNDLE) exec rspec
+vet: ## Run go vet
+	go vet ./...
 
-build:
-	$(BUNDLE) exec rake build
+fmt: ## Format the code
+	gofmt -w .
 
-version:
-	$(BUNDLE) exec $(RUBY) exe/opensource --version
+fmt-check: ## Fail if any file needs formatting
+	@test -z "$$(gofmt -l .)" || (echo "Run 'make fmt'"; gofmt -l .; exit 1)
 
-console:
-	$(BUNDLE) exec bin/console
+version: ## Print the CLI version
+	go run . --version
 
-clean:
-	$(BUNDLE) exec rake clean
+clean: ## Remove build artifacts
+	rm -rf bin dist
 
-ci: test build version
+snapshot: ## Build a local release snapshot with GoReleaser (no publish)
+	go run github.com/goreleaser/goreleaser/v2@latest release --snapshot --clean

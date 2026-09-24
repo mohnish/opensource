@@ -1,0 +1,81 @@
+# GoReleaser configuration.
+# Docs: https://goreleaser.com
+#
+# Cut a release by pushing a semver tag (e.g. `git tag 3.0.0 && git push --tags`).
+# The Release workflow runs `goreleaser release --clean`, which builds the
+# cross-platform binaries, publishes a GitHub Release, and updates the Homebrew
+# formula in mohnish/homebrew-tap.
+version: 2
+
+project_name: opensource
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: opensource
+    main: .
+    binary: opensource
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: default
+    formats:
+      - tar.gz
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+homebrew_casks:
+  - name: opensource
+    repository:
+      owner: mohnish
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Casks
+    homepage: "https://github.com/mohnish/opensource"
+    description: "Command line tool that adds an open source license to your project"
+    commit_author:
+      name: goreleaserbot
+      email: goreleaserbot@users.noreply.github.com
+    # Remove the macOS Gatekeeper quarantine attribute so the unsigned binary
+    # runs without "cannot be opened" prompts.
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/opensource"]
+          end
+
+release:
+  github:
+    owner: mohnish
+    name: opensource
