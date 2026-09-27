@@ -1,7 +1,8 @@
 
-3.0.0 / unreleased
+3.0.0 / 2026-09-27
 ==================
 
+  * Distribute signed and notarized bins via brew cask
   * Rewrite in Go and distribute a single static binary
   * Install via Homebrew (`brew install --cask mohnish/opensource/opensource`) or `go install`
   * Automate cross-platform releases with GoReleaser and GitHub Actions
