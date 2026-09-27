@@ -102,6 +102,7 @@ jobs:
           tapdir="$(brew --repository "$tap")"
           mkdir -p "$tapdir/Casks"
           cp homebrew-tap/Casks/opensource.rb "$tapdir/Casks/opensource.rb"
+          brew trust --cask "$tap/opensource"
 
       - name: Audit and install cask
         shell: bash
@@ -131,4 +132,5 @@ jobs:
         if: always()
         run: |
           brew uninstall --cask --force opensource-release/check/opensource >/dev/null 2>&1 || true
+          brew untrust --cask opensource-release/check/opensource >/dev/null 2>&1 || true
           brew untap opensource-release/check >/dev/null 2>&1 || true
