@@ -27,3 +27,9 @@ jobs:
       - run: go vet ./...
       - run: go build ./...
       - run: go test -race ./...
+      - name: Validate release configuration
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: v2.18.2
+          args: check

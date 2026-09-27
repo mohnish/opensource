@@ -3,8 +3,9 @@
 ==================
 
   * Rewrite in Go and distribute a single static binary
-  * Install via Homebrew (`brew install mohnish/tap/opensource`) or `go install`
+  * Install via Homebrew (`brew install --cask mohnish/opensource/opensource`) or `go install`
   * Automate cross-platform releases with GoReleaser and GitHub Actions
+  * Sign and notarize macOS binaries and validate the published Homebrew cask
   * Read legacy `~/.osrc` files written by the Ruby version
 
 2.1.0 / 2026-07-25

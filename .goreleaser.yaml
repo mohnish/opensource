@@ -1,17 +1,12 @@
 # GoReleaser configuration.
 # Docs: https://goreleaser.com
 #
-# Cut a release by pushing a semver tag (e.g. `git tag 3.0.0 && git push --tags`).
-# The Release workflow runs `goreleaser release --clean`, which builds the
-# cross-platform binaries, publishes a GitHub Release, and updates the Homebrew
-# formula in mohnish/homebrew-tap.
+# Push a semver tag (e.g. v3.0.0) to build release archives, sign and notarize
+# the macOS binaries, publish a GitHub Release, and update Casks/opensource.rb
+# in mohnish/homebrew-opensource. See README.md for the required repository secrets.
 version: 2
 
 project_name: opensource
-
-before:
-  hooks:
-    - go mod tidy
 
 builds:
   - id: opensource
@@ -23,6 +18,7 @@ builds:
       - -trimpath
     ldflags:
       - -s -w -X main.version={{ .Version }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
     goos:
       - linux
       - darwin
@@ -31,8 +27,25 @@ builds:
       - amd64
       - arm64
 
+notarize:
+  macos:
+    - enabled: true
+      ids:
+        - opensource
+      sign:
+        certificate: "{{ .Env.MACOS_SIGN_P12 }}"
+        password: "{{ .Env.MACOS_SIGN_PASSWORD }}"
+      notarize:
+        issuer_id: "{{ .Env.MACOS_NOTARY_ISSUER_ID }}"
+        key_id: "{{ .Env.MACOS_NOTARY_KEY_ID }}"
+        key: "{{ .Env.MACOS_NOTARY_KEY }}"
+        wait: true
+        timeout: 20m
+
 archives:
   - id: default
+    ids:
+      - opensource
     formats:
       - tar.gz
     name_template: >-
@@ -41,6 +54,9 @@ archives:
       - goos: windows
         formats:
           - zip
+    files:
+      - README.md
+      - LICENSE
 
 checksum:
   name_template: "checksums.txt"
@@ -55,27 +71,28 @@ changelog:
 
 homebrew_casks:
   - name: opensource
+    ids:
+      - default
     repository:
       owner: mohnish
-      name: homebrew-tap
+      name: homebrew-opensource
       branch: main
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     directory: Casks
     homepage: "https://github.com/mohnish/opensource"
     description: "Command line tool that adds an open source license to your project"
+    license: MIT
+    binaries:
+      - opensource
+    skip_upload: auto
     commit_author:
-      name: goreleaserbot
-      email: goreleaserbot@users.noreply.github.com
-    # Remove the macOS Gatekeeper quarantine attribute so the unsigned binary
-    # runs without "cannot be opened" prompts.
-    hooks:
-      post:
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/opensource"]
-          end
+      name: github-actions[bot]
+      email: 41898282+github-actions[bot]@users.noreply.github.com
+    commit_msg_template: "Release {{ .ProjectName }} {{ .Tag }}"
 
 release:
+  name_template: "{{ .Tag }}"
+  prerelease: auto
   github:
     owner: mohnish
     name: opensource

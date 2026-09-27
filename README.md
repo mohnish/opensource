@@ -15,17 +15,48 @@ A single, dependency-free binary written in Go.
 
 ## Installation
 
-### Homebrew
+### Homebrew cask (macOS)
+
+Install the signed and notarized binary for Apple Silicon or Intel Macs from
+the [`mohnish/opensource` tap](https://github.com/mohnish/homebrew-opensource).
+Go is not required:
 
 ```bash
-brew install mohnish/tap/opensource
+brew install --cask mohnish/opensource/opensource
+```
+
+The fully qualified name selects the project's tap and cask explicitly. See
+[Homebrew's tap trust documentation](https://docs.brew.sh/Tap-Trust) for how
+Homebrew handles installation from third-party taps.
+
+Verify the installation:
+
+```bash
+opensource --version
 ```
 
 To upgrade later:
 
 ```bash
-brew upgrade opensource
+brew update
+brew upgrade --cask mohnish/opensource/opensource
 ```
+
+To uninstall:
+
+```bash
+brew uninstall --cask opensource
+```
+
+If you previously installed the Homebrew formula, remove it before installing
+the cask so both installations do not compete for the `opensource` command:
+
+```bash
+brew uninstall --formula opensource
+brew install --cask mohnish/opensource/opensource
+```
+
+Your saved name and email in `~/.osrc` are retained.
 
 ### go install
 
@@ -35,7 +66,18 @@ go install github.com/mohnish/opensource@latest
 
 ### Prebuilt binaries
 
-Download a binary for your platform from the [releases page](https://github.com/mohnish/opensource/releases) and place it on your `PATH`.
+Download an archive for your operating system and architecture from the
+[releases page](https://github.com/mohnish/opensource/releases):
+
+| Operating system | Architectures | Archive |
+| --- | --- | --- |
+| macOS | arm64 (Apple Silicon), amd64 (Intel) | `.tar.gz` |
+| Linux | arm64, amd64 | `.tar.gz` |
+| Windows | arm64, amd64 | `.zip` |
+
+Each release includes `checksums.txt` with SHA-256 checksums. Extract the archive
+and put `opensource` (or `opensource.exe` on Windows) in a directory on your
+`PATH`. The macOS binaries are signed and notarized.
 
 ## Usage
 
@@ -96,25 +138,97 @@ make vet
 make
 ```
 
-Build a local release snapshot (no publishing) with [GoReleaser](https://goreleaser.com):
+Build an unsigned local release snapshot (no credentials or publishing) with
+[GoReleaser](https://goreleaser.com):
 
 ```bash
 make snapshot
 ```
 
+Run the full release readiness check, including Go checks, all six archives,
+checksums, and a smoke test of the packaged binary on your machine:
+
+```bash
+make release-check
+```
+
+These targets use GoReleaser v2.18.2, matching CI. Go downloads it on first use;
+Python 3 is also required for `release-check`. To use an installed GoReleaser:
+`make release-check GORELEASER=goreleaser`.
+
 ## Releasing
 
-Releases are automated with GoReleaser and GitHub Actions.
+The [Release workflow](.github/workflows/release.yml) tests the code, builds
+release binaries, signs and notarizes the macOS binaries, publishes GitHub
+Release archives and checksums, then updates `Casks/opensource.rb` in
+[`mohnish/homebrew-opensource`](https://github.com/mohnish/homebrew-opensource).
+It also publishes Linux and Windows binaries for arm64 and amd64. Binaries
+remain GitHub Release assets; neither repository stores them in Git history.
 
-1. One-time setup: create a `homebrew-tap` repository under your account (i.e. `mohnish/homebrew-tap`) and add a repository secret named `HOMEBREW_TAP_GITHUB_TOKEN` to this repo — a fine-grained personal access token with `contents: write` on the tap repo.
-2. Cut a release by pushing a semver tag:
+### Maintainer setup
 
-   ```bash
-   git tag 3.0.0
-   git push origin 3.0.0
-   ```
+The public `mohnish/homebrew-opensource` repository is initialized on `main`.
+GoReleaser creates and updates the cask on each stable release; no manual cask
+or checksum edits are needed.
 
-The [Release workflow](.github/workflows/release.yml) builds cross-platform binaries, publishes a GitHub Release with checksums, and updates the Homebrew formula in the tap so `brew install mohnish/tap/opensource` picks up the new version.
+Configure these repository secrets in **mohnish/opensource → Settings → Secrets
+and variables → Actions**:
+
+| Secret | Value |
+| --- | --- |
+| `HOMEBREW_TAP_TOKEN` | Fine-grained GitHub PAT with **Contents: Read and write** for `mohnish/homebrew-opensource`. |
+| `MACOS_SIGN_P12` | Base64-encoded Developer ID Application certificate and private key exported as a `.p12`. |
+| `MACOS_SIGN_PASSWORD` | Password for the `.p12` export. |
+| `MACOS_NOTARY_KEY` | Base64-encoded App Store Connect team API key (`.p8`). |
+| `MACOS_NOTARY_KEY_ID` | API key ID. |
+| `MACOS_NOTARY_ISSUER_ID` | API issuer ID. |
+
+The tap token must grant access to `mohnish/homebrew-opensource`, and the Apple
+credentials must belong to the team issuing the Developer ID certificate.
+`GITHUB_TOKEN` is provided automatically by Actions for publishing this project's
+release.
+
+Encode each credential file on macOS without line wrapping:
+
+```bash
+base64 -i DeveloperIDApplication.p12 | tr -d '\n' | pbcopy
+base64 -i AuthKey_KEYID.p8 | tr -d '\n' | pbcopy
+```
+
+Run each command separately and save its clipboard value to the corresponding
+secret. See [GoReleaser's signing and notarization documentation](https://goreleaser.com/customization/sign/notarize/)
+for credential setup.
+
+### Publish a release
+
+Run the local checks before committing:
+
+```bash
+make release-check
+```
+
+Commit and push the release changes, including any updated release notes in
+[`History.md`](History.md). Then create and push the next version tag (for
+example, `v3.0.0`):
+
+```bash
+git tag -a v3.0.0 -m "opensource v3.0.0"
+git push origin v3.0.0
+```
+
+Both `v3.0.0` and historical unprefixed tags such as `3.0.0` trigger the workflow;
+use one tag per version. Prerelease tags such as `v3.0.0-rc.1` publish GitHub
+prereleases without updating the stable Homebrew cask.
+
+For stable releases, a macOS job audits and installs the published cask, checks
+the binary's signature and version, and tests setup and license generation in a
+temporary directory. Wait for both jobs in the
+[Release workflow run](https://github.com/mohnish/opensource/actions/workflows/release.yml)
+to succeed before announcing the release.
+
+Local `make release-check` builds unsigned snapshots without publishing and
+cannot verify Apple credentials or tap permissions. The tagged workflow
+validates those integrations.
 
 ## License
 

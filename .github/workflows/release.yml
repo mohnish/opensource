@@ -3,28 +3,132 @@ name: Release
 on:
   push:
     tags:
-      - "*.*.*"
+      - "v*"
+      - "[0-9]*.[0-9]*.[0-9]*"
 
 permissions:
   contents: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
-  goreleaser:
+  release:
+    name: Build, sign, notarize, and publish
     runs-on: ubuntu-latest
+    outputs:
+      stable: ${{ steps.release-kind.outputs.stable }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out OpenSource
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
-      - uses: goreleaser/goreleaser-action@v6
+          cache: true
+
+      - name: Verify release secrets
+        shell: bash
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          MACOS_SIGN_P12: ${{ secrets.MACOS_SIGN_P12 }}
+          MACOS_SIGN_PASSWORD: ${{ secrets.MACOS_SIGN_PASSWORD }}
+          MACOS_NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY }}
+          MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
+          MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$HOMEBREW_TAP_TOKEN" || { echo "::error::HOMEBREW_TAP_TOKEN is not configured"; exit 1; }
+          test -n "$MACOS_SIGN_P12" || { echo "::error::MACOS_SIGN_P12 is not configured"; exit 1; }
+          test -n "$MACOS_SIGN_PASSWORD" || { echo "::error::MACOS_SIGN_PASSWORD is not configured"; exit 1; }
+          test -n "$MACOS_NOTARY_KEY" || { echo "::error::MACOS_NOTARY_KEY is not configured"; exit 1; }
+          test -n "$MACOS_NOTARY_KEY_ID" || { echo "::error::MACOS_NOTARY_KEY_ID is not configured"; exit 1; }
+          test -n "$MACOS_NOTARY_ISSUER_ID" || { echo "::error::MACOS_NOTARY_ISSUER_ID is not configured"; exit 1; }
+
+      - name: Determine release kind
+        id: release-kind
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if [[ "$version" == *-* ]]; then
+            echo "stable=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "stable=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Test
+        run: make check
+
+      - name: Publish release and Homebrew cask
+        uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
-          version: "~> v2"
-          args: release --clean
+          version: v2.18.2
+          args: release --clean --timeout 30m
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Fine-grained PAT with contents:write on mohnish/homebrew-tap.
-          # Add it under Settings > Secrets and variables > Actions.
-          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          MACOS_SIGN_P12: ${{ secrets.MACOS_SIGN_P12 }}
+          MACOS_SIGN_PASSWORD: ${{ secrets.MACOS_SIGN_PASSWORD }}
+          MACOS_NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY }}
+          MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
+          MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
+
+  validate-cask:
+    name: Validate published cask
+    needs: release
+    if: needs.release.outputs.stable == 'true'
+    runs-on: macos-latest
+    steps:
+      - name: Check out Homebrew tap
+        uses: actions/checkout@v6
+        with:
+          repository: mohnish/homebrew-opensource
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          ref: main
+          persist-credentials: false
+          path: homebrew-tap
+
+      - name: Stage published cask
+        shell: bash
+        run: |
+          set -euo pipefail
+          tap="opensource-release/check"
+          brew tap-new "$tap"
+          tapdir="$(brew --repository "$tap")"
+          mkdir -p "$tapdir/Casks"
+          cp homebrew-tap/Casks/opensource.rb "$tapdir/Casks/opensource.rb"
+
+      - name: Audit and install cask
+        shell: bash
+        run: |
+          set -euo pipefail
+          brew audit --cask --strict --online opensource-release/check/opensource
+          brew install --cask opensource-release/check/opensource
+
+      - name: Smoke test installed binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          opensource_bin="$(brew --prefix)/bin/opensource"
+          expected_version="${GITHUB_REF_NAME#v}"
+          test "$("$opensource_bin" --version)" = "$expected_version"
+          /usr/bin/codesign --verify --strict --verbose=2 "$opensource_bin"
+          smoke_dir="$(mktemp -d "$RUNNER_TEMP/opensource-smoke.XXXXXX")"
+          mkdir -p "$smoke_dir/home" "$smoke_dir/project"
+          cd "$smoke_dir/project"
+          printf 'Release Test\nrelease@example.com\n' | HOME="$smoke_dir/home" "$opensource_bin" --setup
+          HOME="$smoke_dir/home" "$opensource_bin" --license mit --append README.md
+          grep -F 'Release Test <release@example.com>' LICENSE
+          grep -F 'Permission is hereby granted' LICENSE
+          grep -F '## License' README.md
+
+      - name: Clean up temporary tap
+        if: always()
+        run: |
+          brew uninstall --cask --force opensource-release/check/opensource >/dev/null 2>&1 || true
+          brew untap opensource-release/check >/dev/null 2>&1 || true

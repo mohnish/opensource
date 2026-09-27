@@ -2,8 +2,9 @@
 
 BINARY := opensource
 VERSION ?= dev
+GORELEASER ?= go run github.com/goreleaser/goreleaser/v2@v2.18.2
 
-.PHONY: help build install test vet fmt fmt-check version clean snapshot
+.PHONY: help build install test vet fmt fmt-check check version clean snapshot release-check
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -27,6 +28,8 @@ fmt: ## Format the code
 fmt-check: ## Fail if any file needs formatting
 	@test -z "$$(gofmt -l .)" || (echo "Run 'make fmt'"; gofmt -l .; exit 1)
 
+check: fmt-check vet test ## Run formatting, vet, and race tests
+
 version: ## Print the CLI version
 	go run . --version
 
@@ -34,4 +37,9 @@ clean: ## Remove build artifacts
 	rm -rf bin dist
 
 snapshot: ## Build a local release snapshot with GoReleaser (no publish)
-	go run github.com/goreleaser/goreleaser/v2@latest release --snapshot --clean
+	$(GORELEASER) release --snapshot --clean --skip=publish,notarize
+
+release-check: check ## Validate release config, archives, checksums, and local binary
+	$(GORELEASER) check
+	$(MAKE) snapshot
+	python3 scripts/check-release.py
