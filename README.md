@@ -22,17 +22,12 @@ the [`mohnish/opensource` tap](https://github.com/mohnish/homebrew-opensource).
 Go is not required:
 
 ```bash
-brew tap mohnish/opensource
-brew trust --cask mohnish/opensource/opensource
 brew install --cask mohnish/opensource/opensource
 ```
 
-The tap and trust commands are a one-time setup. `brew trust --cask` allows
-Homebrew to load this specific cask for installation, audits, and upgrades.
-Homebrew 6 and newer require explicit trust for third-party taps or their
-individual items. A fully qualified `brew install --cask` also grants trust to
-that cask automatically; the commands above make the trust step explicit. See
-[Homebrew's tap trust documentation](https://docs.brew.sh/Tap-Trust).
+Homebrew adds the tap automatically and trusts the OpenSource cask when you
+install it by its full name. No separate `brew tap` or `brew trust` step is
+needed. See [Homebrew's tap trust documentation](https://docs.brew.sh/Tap-Trust).
 
 Verify the installation:
 
