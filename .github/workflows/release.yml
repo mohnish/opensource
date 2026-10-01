@@ -21,7 +21,7 @@ jobs:
       stable: ${{ steps.release-kind.outputs.stable }}
     steps:
       - name: Check out OpenSource
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -89,7 +89,7 @@ jobs:
       HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
     steps:
       - name: Check out Homebrew tap
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: mohnish/homebrew-opensource
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
